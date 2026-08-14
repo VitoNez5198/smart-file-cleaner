@@ -1,6 +1,6 @@
 """
-config.py - Configuración personalizada para Smart File Cleaner.
-Basada en el análisis del inventario real de 652 archivos del usuario.
+config.py - Configuración universal y reutilizable para Smart File Cleaner.
+Funciona en cualquier computador (universidades, trabajo, desarrollo o uso personal).
 """
 
 from pathlib import Path
@@ -22,21 +22,21 @@ EXTENSION_CATEGORIES = {
     "Logs_Temporales": [".log", ".tmp", ".bak"]
 }
 
-# 2. Reglas prioritarias por palabras clave (El orden de prioridad importa)
+# 2. Reglas prioritarias por palabras clave universales (El orden de prioridad importa)
 KEYWORD_CATEGORIES = {
     # 1. Prioridad Máxima: Currículums y Postulaciones Laborales
     "Postulaciones_CV": [
         "cv", "curriculum", "resume", "carta de compromiso", "logros", "elevator pitch"
     ],
-    # 2. Material de Estudio Universidad AIEP
-    "AIEP_Material_Estudio": [
-        "aiep", "semana", "unidad", "tema", "pro303", "soo301", "actividad",
+    # 2. Material de Estudio, Cursos y Asignaturas (Universal para cualquier instituto/universidad/colegio)
+    "Material_Estudio_Cursos": [
+        "aiep", "semana", "unidad", "tema", "actividad", "evaluacion", "curso",
         "apunte", "clase", "taller", "orientados-a-objetos", "analisis-de-sistemas",
-        "plantilla de entrega", "lab -", "demostración"
+        "plantilla de entrega", "lab -", "demostración", "guia", "tarea", "entrega", "syllabus"
     ],
-    # 3. Credenciales Cloud AWS
-    "AWS_Cloud_Credenciales": [
-        "labsuser", "accesskeys", "amazon", "aws", "clave1"
+    # 3. Credenciales Cloud y Claves de Acceso (AWS, Azure, GCP, SSH)
+    "Credenciales_Cloud": [
+        "labsuser", "accesskeys", "amazon", "aws", "azure", "gcp", "clave1", "ssh_key"
     ],
     # 4. Capturas de Pantalla
     "Capturas_Pantalla": [

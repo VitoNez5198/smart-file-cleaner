@@ -11,18 +11,20 @@ import re
 def get_category_by_keyword(item_path: Path) -> str | None:
     """
     Busca palabras clave y patrones en el nombre del archivo o carpeta.
-    Si encuentra alguna coincidencia, retorna la categoría correspondiente.
+    Normaliza guiones y guiones bajos para búsquedas flexibles.
     """
-    stem_lower = item_path.stem.lower()
+    stem_raw = item_path.stem.lower()
+    stem_normalized = stem_raw.replace("_", " ").replace("-", " ")
     
-    # 1. Patrón Regex de códigos de asignatura AIEP (ej: PRO402, SOO301, INF101, MAT201)
-    if re.search(r'[a-zA-Z]{3}\d{3}', stem_lower):
-        return "AIEP_Material_Estudio"
+    # 1. Patrón Regex universal de códigos de asignatura (2 a 4 letras seguidas de 2 a 4 números, ej: CS101, PRO402, MAT2001)
+    if re.search(r'[a-zA-Z]{2,4}\d{2,4}', stem_raw):
+        return "Material_Estudio_Cursos"
 
     # 2. Búsqueda por palabras clave explícitas
     for category, keywords in config.KEYWORD_CATEGORIES.items():
         for keyword in keywords:
-            if keyword.lower() in stem_lower:
+            kw_lower = keyword.lower()
+            if kw_lower in stem_raw or kw_lower in stem_normalized:
                 return category
     return None
 
