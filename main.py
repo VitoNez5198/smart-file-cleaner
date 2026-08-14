@@ -8,6 +8,10 @@ from pathlib import Path
 import config
 from cleaner import organize_folder, deep_organize_folder, export_scan_report
 
+def is_back_command(user_input: str) -> bool:
+    """Verifica si el usuario ingresó un comando para cancelar o volver atrás."""
+    return user_input.strip().lower() in ["0", "b", "back", "volver", "cancelar", "cancel"]
+
 def get_default_downloads() -> Path:
     """Retorna la carpeta de descargas del usuario de forma automática y portátil."""
     custom_downloads = Path("D:/Descargas")
@@ -39,6 +43,7 @@ def get_default_desktop() -> Path:
 def interactive_wizard():
     """
     Asistente interactivo por consola paso a paso con bucle de menú principal.
+    Permite volver al menú principal en cualquier paso tecleando '0', 'b' o 'volver'.
     """
     while True:
         print("\n" + "=" * 60)
@@ -57,7 +62,7 @@ def interactive_wizard():
 
         choice_origin = input("\n👉 Selecciona una opción (0-6) [Por defecto: 1]: ").strip()
         
-        if choice_origin == "0":
+        if choice_origin == "0" or choice_origin.lower() in ["exit", "salir", "q"]:
             print("\n👋 ¡Gracias por usar Smart File Cleaner! Hasta pronto.\n")
             break
 
@@ -65,14 +70,21 @@ def interactive_wizard():
         if choice_origin == "6":
             print("\n" + "=" * 60)
             print("  ➕ CREAR NUEVA CATEGORÍA PERSONALIZADA")
+            print("  (Escribe '0' o 'volver' en cualquier momento para cancelar)")
             print("=" * 60)
             cat_name = input("\n👉 Nombre de la carpeta destino (ej: Trabajo_COMEX): ").strip().replace(" ", "_")
+            if is_back_command(cat_name):
+                print("\n↩️  Operación cancelada. Volviendo al menú principal...")
+                continue
             if not cat_name:
                 print("\n❌ Nombre de carpeta inválido.")
                 input("\nPresiona ENTER para volver al menú principal...")
                 continue
 
             kws_input = input("👉 Palabras clave separadas por comas (ej: comex, factura, embarque, aduana): ").strip()
+            if is_back_command(kws_input):
+                print("\n↩️  Operación cancelada. Volviendo al menú principal...")
+                continue
             keywords = [k.strip().lower() for k in kws_input.split(",") if k.strip()]
 
             if not keywords:
@@ -87,14 +99,18 @@ def interactive_wizard():
             input("\nPresiona ENTER para volver al menú principal...")
             continue
 
-        # Si elige la Limpieza Profunda Global (Opción 5)
+        # Opción 5: Limpieza Profunda Global
         if choice_origin == "5":
             target_dir = get_default_downloads()
             print("\n📌 Modo seleccionado: 🌐 LIMPIEZA PROFUNDA GLOBAL")
             print("  [1] 🧪 SIMULACIÓN (Previsualizar qué archivos se re-clasificarían)")
             print("  [2] 🚀 EJECUCIÓN REAL (Re-ubicar archivos físicamente)")
+            print("  [0] ↩️  Volver al menú principal")
 
-            choice_mode = input("\n👉 Selecciona el modo (1-2) [Por defecto: 1]: ").strip()
+            choice_mode = input("\n👉 Selecciona el modo (0-2) [Por defecto: 1]: ").strip()
+            if is_back_command(choice_mode):
+                print("\n↩️  Volviendo al menú principal...")
+                continue
             dry_run = False if choice_mode == "2" else True
 
             try:
@@ -122,14 +138,20 @@ def interactive_wizard():
         if choice_origin == "2":
             target_dir = get_default_downloads()
         elif choice_origin == "3":
-            custom_path = input("\n📋 Pega o escribe la ruta completa de la carpeta: ").strip().strip('"').strip("'")
+            custom_path = input("\n📋 Pega o escribe la ruta completa de la carpeta (o '0' para volver): ").strip().strip('"').strip("'")
+            if is_back_command(custom_path):
+                print("\n↩️  Volviendo al menú principal...")
+                continue
             target_dir = Path(custom_path)
             if not target_dir.exists():
                 print(f"\n❌ [ERROR] La ruta especificada no existe: {target_dir}")
                 input("\nPresiona ENTER para volver al menú principal...")
                 continue
         elif choice_origin == "4":
-            sub_folder = input(f"\n📋 Escribe el nombre de la subcarpeta dentro de Descargas (ej: Documentos): ").strip()
+            sub_folder = input(f"\n📋 Escribe el nombre de la subcarpeta dentro de Descargas (ej: Documentos, o '0' para volver): ").strip()
+            if is_back_command(sub_folder):
+                print("\n↩️  Volviendo al menú principal...")
+                continue
             if not sub_folder:
                 sub_folder = "Documentos"
             target_dir = get_default_downloads() / sub_folder
@@ -145,8 +167,12 @@ def interactive_wizard():
         print(f"\n📌 PASO 2: ¿Dónde deseas guardar los archivos organizados?")
         print(f"  [1] 🎯 Almacén Central en Descargas ({default_dest}) [Recomendado para Escritorio]")
         print(f"  [2] 📂 Dentro de la misma carpeta origen ({target_dir})")
+        print("  [0] ↩️  Volver al menú principal")
 
-        choice_dest = input("\n👉 Selecciona el destino (1-2) [Por defecto: 1]: ").strip()
+        choice_dest = input("\n👉 Selecciona el destino (0-2) [Por defecto: 1]: ").strip()
+        if is_back_command(choice_dest):
+            print("\n↩️  Volviendo al menú principal...")
+            continue
         dest_dir = default_dest if choice_dest != "2" else target_dir
 
         # PASO 3: Selección del Tipo de Elementos
@@ -154,8 +180,12 @@ def interactive_wizard():
         print("  [1] 📄 Solo archivos sueltos (PDFs, imágenes, instaladores, etc.)")
         print("  [2] 📁 Solo carpetas (proyectos, laboratorios, subcarpetas)")
         print("  [3] 📦 Archivos Y Carpetas (Limpieza completa)")
+        print("  [0] ↩️  Volver al menú principal")
 
-        choice_type = input("\n👉 Selecciona una opción (1-3) [Por defecto: 3]: ").strip()
+        choice_type = input("\n👉 Selecciona una opción (0-3) [Por defecto: 3]: ").strip()
+        if is_back_command(choice_type):
+            print("\n↩️  Volviendo al menú principal...")
+            continue
         
         if choice_type == "1":
             include_files, include_folders = True, False
@@ -168,8 +198,12 @@ def interactive_wizard():
         print("\n📌 PASO 4: Modo de Operación")
         print("  [1] 🧪 SIMULACIÓN (Recomendado: Previsualiza sin mover nada)")
         print("  [2] 🚀 EJECUCIÓN REAL (Moverá físicamente los archivos y carpetas)")
+        print("  [0] ↩️  Volver al menú principal")
 
-        choice_mode = input("\n👉 Selecciona el modo (1-2) [Por defecto: 1]: ").strip()
+        choice_mode = input("\n👉 Selecciona el modo (0-2) [Por defecto: 1]: ").strip()
+        if is_back_command(choice_mode):
+            print("\n↩️  Volviendo al menú principal...")
+            continue
         dry_run = False if choice_mode == "2" else True
 
         # Confirmación y Resumen
