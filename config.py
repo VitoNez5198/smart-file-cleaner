@@ -44,5 +44,18 @@ KEYWORD_CATEGORIES = {
     ]
 }
 
-# Carpeta por defecto
+# Categoría por defecto para carpetas sueltas / proyectos no identificados por palabras clave
+DEFAULT_FOLDER_CATEGORY = "Proyectos_Y_Carpetas"
+
+# Carpeta por defecto para archivos
 DEFAULT_CATEGORY = "Otros"
+
+# Archivos y carpetas protegidos que NUNCA deben ser movidos ni modificados
+PROTECTED_NAMES = {
+    "smart-file-cleaner", "smart_file_cleaner", "desktop.ini", "$recycle.bin", ".git"
+}
+
+# Extensiones ignoradas en el Escritorio (accesos directos y configuración)
+IGNORED_EXTENSIONS = {
+    ".lnk", ".url", ".sys", ".ini"
+}

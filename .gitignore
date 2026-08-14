@@ -18,6 +18,11 @@ scan_report.json
 *.log
 logs/
 
+# Compilados de PyInstaller / Ejecutables
+build/
+dist/
+*.spec
+
 # Carpetas de prueba locales
 test_downloads/
 test_desktop/
