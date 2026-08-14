@@ -1,6 +1,6 @@
 # Smart File Cleaner 🧹✨
 
-Un organizador automático, portátil e inteligente en Python para limpiar tus carpetas de **Escritorio** y **Descargas**, clasificando archivos sueltos y carpetas de proyectos mediante **patrones de expresiones regulares**, **palabras clave universales** y un **asistente interactivo paso a paso**.
+Un organizador automático, portátil e inteligente en Python para limpiar tus carpetas de **Escritorio** y **Descargas**, clasificando archivos sueltos y carpetas de proyectos mediante **patrones de expresiones regulares**, **palabras clave universales**, **reglas personalizadas sin código** y un **asistente interactivo paso a paso**.
 
 ---
 
@@ -9,8 +9,11 @@ Un organizador automático, portátil e inteligente en Python para limpiar tus c
 - **🤖 Asistente Interactivo por Consola (CLI Wizard)**:
   - Ejecuta el programa con un menú interactivo en bucle.
   - Selecciona fácilmente carpetas (Escritorio, Descargas, rutas personalizadas o subcarpetas existentes).
-  - Permite elegir mover **solo archivos**, **solo carpetas de proyectos** o **todo**.
   - **Transición Fluida**: Al terminar la simulación, te ofrece aplicar la migración real inmediatamente sin reiniciar el programa ni cerrar la ventana.
+
+- **➕ Reglas Personalizadas Dinámicas (Opción [6])**:
+  - Permite a cualquier usuario (ej: trabajo en COMEX, salud, finanzas, diseño) **crear sus propias carpetas y palabras clave** directamente desde el menú por consola, **sin tocar una sola línea de código Python**.
+  - Se guardan automáticamente en `user_rules.json` con prioridad máxima.
 
 - **🌐 100% Portátil y Universal (Cero Rutas Fijas)**:
   - Detecta automáticamente las carpetas de usuario en cualquier PC (`C:\Users\NombreUsuario\...` o unidades secundarias `D:\...`).
@@ -24,6 +27,9 @@ Un organizador automático, portátil e inteligente en Python para limpiar tus c
 - **📁 Soporte Seguro para Carpetas de Proyectos**:
   - Mueve carpetas completas de proyectos o laboratorios de desarrollo a `Proyectos_Y_Carpetas` o la categoría correspondiente.
   - **Protección Total**: Ignora accesos directos del sistema (`.lnk`, `.url`), la propia carpeta del programa (`smart-file-cleaner`) y archivos protegidos del sistema.
+
+- **🧹 Limpieza de Carpetas Vacías Secundarias**:
+  - Elimina automáticamente subcarpetas temporales que hayan quedado 100% vacías tras mover sus archivos, manteniendo intactas las carpetas principales de categorías.
 
 - **🛡️ Tolerancia a Fallos y Archivos en Uso**:
   - Si un archivo o carpeta está abierto en Word, Acrobat u otra aplicación, el programa no se cierra; emite una advertencia, omite el elemento en uso y **continúa procesando todo lo demás**.
@@ -39,10 +45,10 @@ Un organizador automático, portátil e inteligente en Python para limpiar tus c
 ```text
 smart-file-cleaner/
 ├── cleaner.bat          # Lanzador directo para la terminal de Windows
-├── config.py           # Configuración de categorías universales y palabras clave
-├── cleaner.py          # Lógica principal de ordenamiento, regex y protección
+├── config.py           # Configuración de categorías universales y motor de reglas
+├── cleaner.py          # Lógica principal de ordenamiento, regex, limpieza profunda y protección
 ├── main.py             # Menú interactivo y punto de entrada CLI
-├── .gitignore          # Exclusión de ejecutables, datos personales y temporales
+├── .gitignore          # Exclusión de ejecutables, datos personales y reglas locales
 └── README.md           # Documentación profesional del proyecto
 ```
 
@@ -53,6 +59,17 @@ smart-file-cleaner/
 ### 1. Ejecución mediante Doble Clic (Windows)
 - Haz **doble clic en `cleaner.bat`** o en el ejecutable `dist/SmartFileCleaner.exe`.
 - Se abrirá la consola interactiva con el menú principal.
+
+```text
+📌 PASO 1: ¿Qué tipo de limpieza deseas realizar?
+  [1] 🖥️  Limpiar Escritorio
+  [2] 📥 Limpiar Descargas
+  [3] 📂 Pegar o escribir una ruta personalizada
+  [4] 🔄 Re-organizar subcarpeta específica
+  [5] 🌐 LIMPIEZA PROFUNDA GLOBAL (Re-clasificar subcarpetas)
+  [6] ➕ Crear nueva categoría personalizada (sin tocar código)
+  [0] ❌ Salir del programa
+```
 
 ### 2. Ejecución Interactiva por Terminal
 ```bash
@@ -67,6 +84,9 @@ python main.py --desktop --to-downloads --include-folders
 # Ejecución real en el Escritorio
 python main.py --desktop --to-downloads --include-folders --real
 
+# Limpieza profunda global
+python main.py --deep --real
+
 # Escanear e inventariar una carpeta en scan_report.json
 python main.py --scan --folder "D:\Descargas"
 ```
@@ -75,6 +95,7 @@ python main.py --scan --folder "D:\Descargas"
 
 ## ⚙️ Categorías Universales Configuradas (`config.py`)
 
+- **`Reglas Personalizadas del Usuario`** ➕ *(Creadas dinámicamente desde la opción [6])*.
 - **`Postulaciones_CV`** 💼: Currículums, cartas de presentación, logros, elevator pitch.
 - **`Material_Estudio_Cursos`** 🎓: Materiales académicos, guías, tareas, ramos universales (`CS101`, `PRO402`, `SOO301`, etc.).
 - **`Credenciales_Cloud`** ☁️: Claves SSH, llaves de nube AWS/Azure/GCP (`.pem`, `.ppk`, `labsuser`, `accesskeys`).
@@ -93,7 +114,7 @@ python main.py --scan --folder "D:\Descargas"
 ## 🔒 Privacidad y Seguridad
 
 - **100% Local**: No requiere conexión a internet ni envía datos a servidores externos.
-- **Git Security**: El archivo de reporte `scan_report.json`, logs, entorno virtual y compilados `.exe` están estrictamente ignorados en [.gitignore](file:///d:/Escritorio/smart_file_cleaner/smart-file-cleaner/.gitignore).
+- **Git Security**: El archivo de reporte `scan_report.json`, reglas del usuario `user_rules.json`, logs, entorno virtual y compilados `.exe` están estrictamente ignorados en [.gitignore](.gitignore).
 
 ---
 

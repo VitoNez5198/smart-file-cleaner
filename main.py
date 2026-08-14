@@ -6,16 +6,14 @@ import sys
 import argparse
 from pathlib import Path
 import config
-from cleaner import organize_folder, export_scan_report
+from cleaner import organize_folder, deep_organize_folder, export_scan_report
 
 def get_default_downloads() -> Path:
     """Retorna la carpeta de descargas del usuario de forma automática y portátil."""
-    # 1. Probar unidad secundaria D:\Descargas si existe
     custom_downloads = Path("D:/Descargas")
     if custom_downloads.exists():
         return custom_downloads
     
-    # 2. Buscar en la carpeta del usuario actual (soporta Windows en español/inglés)
     home = Path.home()
     for folder_name in ["Downloads", "Descargas"]:
         p = home / folder_name
@@ -26,12 +24,10 @@ def get_default_downloads() -> Path:
 
 def get_default_desktop() -> Path:
     """Retorna la carpeta del Escritorio del usuario de forma automática y portátil."""
-    # 1. Probar unidad secundaria D:\Escritorio si existe
     custom_desktop = Path("D:/Escritorio")
     if custom_desktop.exists():
         return custom_desktop
         
-    # 2. Buscar en la carpeta del usuario actual (soporta Windows en español/inglés)
     home = Path.home()
     for folder_name in ["Desktop", "Escritorio"]:
         p = home / folder_name
@@ -50,18 +46,78 @@ def interactive_wizard():
         print("=" * 60)
 
         # PASO 1: Selección de Carpeta Origen
-        print("\n📌 PASO 1: ¿Qué carpeta deseas limpiar u organizar?")
-        print(f"  [1] 🖥️  Escritorio ({get_default_desktop()})")
-        print(f"  [2] 📥 Descargas ({get_default_downloads()})")
+        print("\n📌 PASO 1: ¿Qué tipo de limpieza deseas realizar?")
+        print(f"  [1] 🖥️  Limpiar Escritorio ({get_default_desktop()})")
+        print(f"  [2] 📥 Limpiar Descargas ({get_default_downloads()})")
         print("  [3] 📂 Pegar o escribir una ruta personalizada")
-        print(f"  [4] 🔄 Re-organizar subcarpeta existente (ej: {get_default_downloads() / 'Documentos'})")
+        print(f"  [4] 🔄 Re-organizar subcarpeta específica (ej: {get_default_downloads() / 'Documentos'})")
+        print(f"  [5] 🌐 LIMPIEZA PROFUNDA GLOBAL (Re-clasificar subcarpetas en {get_default_downloads()})")
+        print("  [6] ➕ Crear nueva categoría personalizada (sin tocar código)")
         print("  [0] ❌ Salir del programa")
 
-        choice_origin = input("\n👉 Selecciona una opción (0-4) [Por defecto: 1]: ").strip()
+        choice_origin = input("\n👉 Selecciona una opción (0-6) [Por defecto: 1]: ").strip()
         
         if choice_origin == "0":
             print("\n👋 ¡Gracias por usar Smart File Cleaner! Hasta pronto.\n")
             break
+
+        # Opción 6: Crear nueva categoría personalizada
+        if choice_origin == "6":
+            print("\n" + "=" * 60)
+            print("  ➕ CREAR NUEVA CATEGORÍA PERSONALIZADA")
+            print("=" * 60)
+            cat_name = input("\n👉 Nombre de la carpeta destino (ej: Trabajo_COMEX): ").strip().replace(" ", "_")
+            if not cat_name:
+                print("\n❌ Nombre de carpeta inválido.")
+                input("\nPresiona ENTER para volver al menú principal...")
+                continue
+
+            kws_input = input("👉 Palabras clave separadas por comas (ej: comex, factura, embarque, aduana): ").strip()
+            keywords = [k.strip().lower() for k in kws_input.split(",") if k.strip()]
+
+            if not keywords:
+                print("\n❌ Debes ingresar al menos una palabra clave.")
+                input("\nPresiona ENTER para volver al menú principal...")
+                continue
+
+            if config.save_user_category(cat_name, keywords):
+                print(f"\n✅ ¡Categoría '{cat_name}' guardada con éxito!")
+                print(f"📁 Todos los archivos con ({', '.join(keywords)}) se moverán ahora a '{cat_name}'.")
+
+            input("\nPresiona ENTER para volver al menú principal...")
+            continue
+
+        # Si elige la Limpieza Profunda Global (Opción 5)
+        if choice_origin == "5":
+            target_dir = get_default_downloads()
+            print("\n📌 Modo seleccionado: 🌐 LIMPIEZA PROFUNDA GLOBAL")
+            print("  [1] 🧪 SIMULACIÓN (Previsualizar qué archivos se re-clasificarían)")
+            print("  [2] 🚀 EJECUCIÓN REAL (Re-ubicar archivos físicamente)")
+
+            choice_mode = input("\n👉 Selecciona el modo (1-2) [Por defecto: 1]: ").strip()
+            dry_run = False if choice_mode == "2" else True
+
+            try:
+                deep_organize_folder(target_dir=target_dir, dry_run=dry_run)
+            except Exception as e:
+                print(f"\n❌ [ERROR] Falló la limpieza profunda: {e}")
+
+            if dry_run:
+                print("-" * 60)
+                apply_real = input("\n👉 ¿Deseas aplicar la MIGRACIÓN REAL PROFUNDA ahora? (s/n) [n]: ").strip().lower()
+                if apply_real == "s":
+                    try:
+                        deep_organize_folder(target_dir=target_dir, dry_run=False)
+                        print("\n✨ ¡Limpieza profunda real completada con éxito!")
+                    except Exception as e:
+                        print(f"\n❌ [ERROR] Falló la limpieza profunda real: {e}")
+
+            print("\n" + "=" * 60)
+            again = input("👉 ¿Deseas realizar otra operación o volver al menú principal? (s/n) [s]: ").strip().lower()
+            if again == "n":
+                print("\n👋 ¡Gracias por usar Smart File Cleaner! Hasta pronto.\n")
+                break
+            continue
 
         if choice_origin == "2":
             target_dir = get_default_downloads()
@@ -183,17 +239,21 @@ def main():
     parser.add_argument("--desktop", action="store_true", help="Organizar la carpeta de Escritorio.")
     parser.add_argument("--to-downloads", action="store_true", help="Redireccionar el destino de la limpieza hacia Descargas.")
     parser.add_argument("--scan", action="store_true", help="Escanea la carpeta e inventaria los archivos en scan_report.json")
+    parser.add_argument("--deep", action="store_true", help="Ejecutar limpieza profunda global re-clasificando archivos en subcarpetas.")
     parser.add_argument("--include-folders", action="store_true", help="Incluir carpetas y proyectos en la reorganización.")
     parser.add_argument("--real", action="store_true", help="Ejecutar el movimiento real de archivos (desactiva el modo simulación).")
 
     args = parser.parse_args()
 
-    # Si se invoca sin argumentos o con -i, lanzamos el asistente interactivo
     if len(sys.argv) == 1 or args.interactive:
         interactive_wizard()
         return
 
-    # Determinar la carpeta a procesar por CLI
+    if args.deep:
+        target_dir = Path(args.folder) if args.folder else get_default_downloads()
+        deep_organize_folder(target_dir=target_dir, dry_run=not args.real)
+        return
+
     if args.desktop:
         target_dir = get_default_desktop()
     elif args.folder:
@@ -201,7 +261,6 @@ def main():
     else:
         target_dir = get_default_downloads()
 
-    # Determinar el destino
     dest_dir = get_default_downloads() if args.to_downloads else target_dir
 
     if args.scan:

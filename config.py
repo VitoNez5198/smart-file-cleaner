@@ -4,6 +4,7 @@ Funciona en cualquier computador (universidades, trabajo, desarrollo o uso perso
 """
 
 from pathlib import Path
+import json
 
 # Carpeta objetivo por defecto
 TARGET_DIR = Path.home() / "Downloads"
@@ -22,7 +23,7 @@ EXTENSION_CATEGORIES = {
     "Logs_Temporales": [".log", ".tmp", ".bak"]
 }
 
-# 2. Reglas prioritarias por palabras clave universales (El orden de prioridad importa)
+# 2. Reglas predeterminadas por palabras clave universales
 KEYWORD_CATEGORIES = {
     # 1. Prioridad Máxima: Currículums y Postulaciones Laborales
     "Postulaciones_CV": [
@@ -43,6 +44,41 @@ KEYWORD_CATEGORIES = {
         "whatsapp", "captura", "pantalla", "screenshot"
     ]
 }
+
+# Archivo local de reglas personalizadas del usuario
+USER_RULES_FILE = Path(__file__).parent / "user_rules.json"
+
+def load_user_categories() -> dict:
+    """Carga reglas personalizadas desde user_rules.json si existe."""
+    if USER_RULES_FILE.exists():
+        try:
+            with open(USER_RULES_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return {}
+    return {}
+
+def save_user_category(category_name: str, keywords: list[str]) -> bool:
+    """Guarda una nueva categoría personalizada en user_rules.json."""
+    current_rules = load_user_categories()
+    current_rules[category_name] = keywords
+    try:
+        with open(USER_RULES_FILE, "w", encoding="utf-8") as f:
+            json.dump(current_rules, f, ensure_ascii=False, indent=2)
+        return True
+    except Exception as e:
+        print(f"[ERROR] No se pudo guardar la regla personalizada: {e}")
+        return False
+
+def get_all_keyword_categories() -> dict:
+    """Devuelve las categorías combinadas dando prioridad máxima a las reglas del usuario."""
+    user_cats = load_user_categories()
+    combined = {}
+    combined.update(user_cats)
+    for cat, kws in KEYWORD_CATEGORIES.items():
+        if cat not in combined:
+            combined[cat] = kws
+    return combined
 
 # Categoría por defecto para carpetas sueltas / proyectos no identificados por palabras clave
 DEFAULT_FOLDER_CATEGORY = "Proyectos_Y_Carpetas"

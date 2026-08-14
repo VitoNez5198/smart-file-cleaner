@@ -5,7 +5,6 @@ cleaner.py - Lógica principal del organizador de archivos y carpetas.
 import shutil
 from pathlib import Path
 import config
-
 import re
 
 def get_category_by_keyword(item_path: Path) -> str | None:
@@ -20,8 +19,9 @@ def get_category_by_keyword(item_path: Path) -> str | None:
     if re.search(r'[a-zA-Z]{2,4}\d{2,4}', stem_raw):
         return "Material_Estudio_Cursos"
 
-    # 2. Búsqueda por palabras clave explícitas
-    for category, keywords in config.KEYWORD_CATEGORIES.items():
+    # 2. Búsqueda por palabras clave explícitas (incluye las reglas personalizadas del usuario)
+    keyword_cats = config.get_all_keyword_categories()
+    for category, keywords in keyword_cats.items():
         for keyword in keywords:
             kw_lower = keyword.lower()
             if kw_lower in stem_raw or kw_lower in stem_normalized:
@@ -107,7 +107,6 @@ def is_protected_item(item: Path, target_dir: Path, dest_dir: Path) -> bool:
     try:
         if item.resolve() == target_dir.resolve() or item.resolve() == dest_dir.resolve():
             return True
-        # Si el item es una carpeta en la raíz del destino que coincide con nuestras categorías conocidas
         all_categories = set(config.EXTENSION_CATEGORIES.keys()).union(config.KEYWORD_CATEGORIES.keys())
         all_categories.add(config.DEFAULT_CATEGORY)
         all_categories.add(getattr(config, "DEFAULT_FOLDER_CATEGORY", "Proyectos_Y_Carpetas"))
@@ -129,12 +128,6 @@ def organize_folder(
     """
     Recorre la carpeta objetivo y organiza archivos y/o carpetas enviándolos
     a la carpeta de destino especificada.
-    
-    :param target_dir: Ruta de la carpeta a limpiar (origen).
-    :param dest_dir: Ruta de la carpeta donde se crearán las subcarpetas organizadas (destino). Si es None, usa target_dir.
-    :param dry_run: Si es True, solo muestra simulación.
-    :param include_files: Si debe mover archivos sueltos.
-    :param include_folders: Si debe mover carpetas sueltas / proyectos.
     """
     if not target_dir.exists():
         print(f"[ERROR] La carpeta origen no existe: {target_dir}")
@@ -149,7 +142,6 @@ def organize_folder(
     moved_count = 0
     skipped_count = 0
 
-    # Congelar la lista de elementos en memoria para evitar errores de iteración mientras se mueven
     try:
         items = list(target_dir.iterdir())
     except Exception as e:
@@ -157,21 +149,17 @@ def organize_folder(
         return
 
     for item in items:
-        # Verificar que el elemento siga existiendo (por si fue movido previa o externamente)
         if not item.exists():
             continue
 
-        # Filtro de protección
         if is_protected_item(item, target_dir, dest_dir):
             continue
 
-        # Filtrar por tipo (archivos / carpetas)
         if item.is_file() and not include_files:
             continue
         if item.is_dir() and not include_folders:
             continue
 
-        # Determinar categoría
         category = determine_item_category(item)
         target_category_folder = dest_dir / category
         dest_item_path = get_unique_destination(target_category_folder, item.name)
@@ -193,6 +181,109 @@ def organize_folder(
 
     print("-" * 60)
     print(f"Proceso finalizado. Éxito: {moved_count} elementos | Omitidos/Errores: {skipped_count}\n")
+    
+    # Limpieza automática de carpetas temporales que hayan quedado vacías
+    cleanup_empty_folders(target_dir, dry_run=dry_run)
+
+
+def deep_organize_folder(target_dir: Path, dry_run: bool = True):
+    """
+    Recorre recursivamente las subcarpetas de categorías (ej: Documentos, Otros, etc.)
+    y evalúa todos los archivos sueltos en su interior para re-clasificarlos y moverlos
+    a su verdadera categoría. Ignora carpetas protegidas de proyectos (Proyectos_Y_Carpetas).
+    """
+    if not target_dir.exists():
+        print(f"[ERROR] La carpeta origen no existe: {target_dir}")
+        return
+
+    mode_label = "[MODO SIMULACIÓN - DRY RUN]" if dry_run else "[MODO REAL]"
+    print(f"\n{mode_label} 🌐 LIMPIEZA PROFUNDA GLOBAL en: {target_dir}\n" + "-" * 60)
+
+    moved_count = 0
+    skipped_count = 0
+
+    protected_folders = {
+        getattr(config, "DEFAULT_FOLDER_CATEGORY", "Proyectos_Y_Carpetas"),
+        "Proyectos_Y_Carpetas", "smart-file-cleaner", "smart_file_cleaner"
+    }
+
+    try:
+        subfolders = [f for f in target_dir.iterdir() if f.is_dir() and f.name not in protected_folders and not f.name.startswith(".")]
+    except Exception as e:
+        print(f"[ERROR] No se pudo leer el contenido de la carpeta: {e}")
+        return
+
+    for subfolder in subfolders:
+        try:
+            # Solo inspeccionar archivos directos dentro de la subcarpeta (profundidad 1)
+            files_in_sub = [f for f in subfolder.iterdir() if f.is_file() and not f.name.startswith(".")]
+        except Exception:
+            continue
+
+            # Extensiones ignoradas
+            ignored_exts = getattr(config, "IGNORED_EXTENSIONS", {".lnk", ".url", ".sys", ".ini"})
+            if file_item.suffix.lower() in ignored_exts:
+                continue
+
+            # Determinar categoría ideal
+            new_category = determine_item_category(file_item)
+
+            # Si la categoría actual del archivo ya coincide con donde está guardado, no se mueve
+            if file_item.parent.name == new_category:
+                continue
+
+            # Si la categoría ideal es diferente, re-ubicamos el archivo
+            target_category_folder = target_dir / new_category
+            dest_file_path = get_unique_destination(target_category_folder, file_item.name)
+
+            rel_origin = f"{subfolder.name}/{file_item.name}"
+
+            if dry_run:
+                print(f"[SIMULACIÓN GLOBAL] 📄 {rel_origin} ➔ {new_category}/{dest_file_path.name}")
+                moved_count += 1
+            else:
+                try:
+                    target_category_folder.mkdir(parents=True, exist_ok=True)
+                    shutil.move(str(file_item), str(dest_file_path))
+                    print(f"[RE-UBICADO GLOBAL] 📄 {rel_origin} ➔ {new_category}/{dest_file_path.name}")
+                    moved_count += 1
+                except Exception as e:
+                    skipped_count += 1
+                    print(f"⚠️  [OMITIDO] {rel_origin} ({e})")
+
+    print("-" * 60)
+    print(f"Limpieza profunda completada. Re-ubicados con éxito: {moved_count} | Omitidos: {skipped_count}\n")
+    
+    # Limpieza automática de carpetas temporales que hayan quedado vacías
+    cleanup_empty_folders(target_dir, dry_run=dry_run)
+
+
+def cleanup_empty_folders(target_dir: Path, dry_run: bool = True):
+    """
+    Elimina carpetas temporales o secundarias que hayan quedado 100% vacías.
+    Conserva intactas las carpetas de categorías principales.
+    """
+    main_categories = set(config.EXTENSION_CATEGORIES.keys()).union(config.KEYWORD_CATEGORIES.keys())
+    main_categories.add(config.DEFAULT_CATEGORY)
+    main_categories.add(getattr(config, "DEFAULT_FOLDER_CATEGORY", "Proyectos_Y_Carpetas"))
+
+    removed_dirs = 0
+    try:
+        subfolders = [f for f in target_dir.iterdir() if f.is_dir() and f.name not in main_categories and not f.name.startswith(".")]
+    except Exception:
+        return
+
+    for folder in subfolders:
+        try:
+            if not any(folder.iterdir()):
+                if dry_run:
+                    print(f"[SIMULACIÓN] 🗑️  Carpeta vacía detectada: {folder.name} (se eliminaría)")
+                else:
+                    folder.rmdir()
+                    print(f"[ELIMINADA CARPETA VACÍA] 🗑️  {folder.name}")
+                removed_dirs += 1
+        except Exception:
+            pass
 
 
 def export_scan_report(target_dir: Path, output_file: str = "scan_report.json"):
