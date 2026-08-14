@@ -6,13 +6,20 @@ import shutil
 from pathlib import Path
 import config
 
+import re
+
 def get_category_by_keyword(item_path: Path) -> str | None:
     """
-    Busca palabras clave en el nombre del archivo o carpeta.
+    Busca palabras clave y patrones en el nombre del archivo o carpeta.
     Si encuentra alguna coincidencia, retorna la categoría correspondiente.
     """
     stem_lower = item_path.stem.lower()
     
+    # 1. Patrón Regex de códigos de asignatura AIEP (ej: PRO402, SOO301, INF101, MAT201)
+    if re.search(r'[a-zA-Z]{3}\d{3}', stem_lower):
+        return "AIEP_Material_Estudio"
+
+    # 2. Búsqueda por palabras clave explícitas
     for category, keywords in config.KEYWORD_CATEGORIES.items():
         for keyword in keywords:
             if keyword.lower() in stem_lower:

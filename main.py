@@ -54,9 +54,10 @@ def interactive_wizard():
         print(f"  [1] 🖥️  Escritorio ({get_default_desktop()})")
         print(f"  [2] 📥 Descargas ({get_default_downloads()})")
         print("  [3] 📂 Pegar o escribir una ruta personalizada")
+        print(f"  [4] 🔄 Re-organizar subcarpeta existente (ej: {get_default_downloads() / 'Documentos'})")
         print("  [0] ❌ Salir del programa")
 
-        choice_origin = input("\n👉 Selecciona una opción (0-3) [Por defecto: 1]: ").strip()
+        choice_origin = input("\n👉 Selecciona una opción (0-4) [Por defecto: 1]: ").strip()
         
         if choice_origin == "0":
             print("\n👋 ¡Gracias por usar Smart File Cleaner! Hasta pronto.\n")
@@ -69,6 +70,15 @@ def interactive_wizard():
             target_dir = Path(custom_path)
             if not target_dir.exists():
                 print(f"\n❌ [ERROR] La ruta especificada no existe: {target_dir}")
+                input("\nPresiona ENTER para volver al menú principal...")
+                continue
+        elif choice_origin == "4":
+            sub_folder = input(f"\n📋 Escribe el nombre de la subcarpeta dentro de Descargas (ej: Documentos): ").strip()
+            if not sub_folder:
+                sub_folder = "Documentos"
+            target_dir = get_default_downloads() / sub_folder
+            if not target_dir.exists():
+                print(f"\n❌ [ERROR] La subcarpeta no existe: {target_dir}")
                 input("\nPresiona ENTER para volver al menú principal...")
                 continue
         else:
