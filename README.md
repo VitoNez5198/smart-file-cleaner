@@ -93,21 +93,21 @@ python main.py --scan --folder "D:\Descargas"
 
 ---
 
-## ⚙️ Categorías Universales Configuradas (`config.py`)
+## ⚙️ Categorías Universales e Inteligentes
 
-- **`Reglas Personalizadas del Usuario`** ➕ *(Creadas dinámicamente desde la opción [6])*.
-- **`Postulaciones_CV`** 💼: Currículums, cartas de presentación, logros, elevator pitch.
-- **`Material_Estudio_Cursos`** 🎓: Materiales académicos, guías, tareas, ramos universales (`CS101`, `PRO402`, `SOO301`, etc.).
-- **`Credenciales_Cloud`** ☁️: Claves SSH, llaves de nube AWS/Azure/GCP (`.pem`, `.ppk`, `labsuser`, `accesskeys`).
-- **`Proyectos_Y_Carpetas`** 📁: Carpetas de proyectos de código, laboratorios y repositorios sueltos.
-- **`Documentos`** 📄: Archivos `.pdf`, `.docx`, `.xlsx`, `.pptx`, `.txt`, `.csv`, `.md`.
-- **`Imagenes`** 🖼️: Formatos estándar y modernos (`.png`, `.jpg`, `.heic`, `.avif`, `.webp`).
-- **`Capturas_Pantalla`** 📸: Screenshots y capturas de pantalla.
-- **`Instaladores_Software`** ⚙️: Programas `.exe`, `.msi`, `.dmg`, `.deb`, `.vsix`.
-- **`Codigo_Notebooks`** 💻: Scripts `.py`, Notebooks `.ipynb`, schemas `.sql`, `.json`.
-- **`Archivos_Comprimidos`** 📦: Archivos `.zip`, `.rar`, `.7z`, `.iso`.
-- **`Libros_Ebooks`** 📚: Ebooks `.epub`, `.mobi`, `.azw3`.
-- **`Video`** 🎥 / **`Audio`** 🎵 / **`Logs_Temporales`** 📝.
+El programa organiza tus archivos de forma limpia y natural. **Solo creará las carpetas que realmente necesites en tu equipo**:
+
+### 📁 Categorías Generales (Por Tipo de Archivo)
+- 📄 **`Documentos`**: PDFs, archivos de Word (`.docx`), planillas Excel (`.xlsx`), presentaciones PowerPoint (`.pptx`), textos y notas.
+- 🖼️ **`Imagenes`**: Fotos e imágenes (`.png`, `.jpg`, `.jpeg`, `.webp`, `.svg`, `.avif`).
+- ⚙️ **`Instaladores_Software`**: Programas e instaladores (`.exe`, `.msi`, `.dmg`, `.deb`).
+- 📦 **`Archivos_Comprimidos`**: Archivos `.zip`, `.rar`, `.7z`, `.iso`.
+- 🎥 **`Video`** / 🎵 **`Audio`**: Archivos multimedia (`.mp4`, `.mp3`, `.wav`, `.mkv`).
+- 📚 **`Libros_Ebooks`**: Libros electrónicos (`.epub`, `.mobi`, `.azw3`).
+- 📁 **`Proyectos_Y_Carpetas`**: Carpetas sueltas de proyectos o laboratorios.
+
+### ➕ Categorías Personalizadas (Creadas por cada usuario)
+- **Opción `[6]` del menú**: Cualquier usuario puede crear sus propias carpetas y palabras clave a medida (ej: `Trabajo_COMEX`, `Finanzas`, `Postulaciones_CV`, `Material_Estudio`) sin tocar código.
 
 ---
 
