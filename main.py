@@ -124,13 +124,18 @@ def interactive_wizard():
                 continue
 
         # Ejecutar la limpieza / simulación
-        organize_folder(
-            target_dir=target_dir,
-            dest_dir=dest_dir,
-            dry_run=dry_run,
-            include_files=include_files,
-            include_folders=include_folders
-        )
+        try:
+            organize_folder(
+                target_dir=target_dir,
+                dest_dir=dest_dir,
+                dry_run=dry_run,
+                include_files=include_files,
+                include_folders=include_folders
+            )
+        except Exception as e:
+            print(f"\n❌ [ERROR] Ocurrió un fallo durante el proceso: {e}")
+            input("\nPresiona ENTER para volver al menú principal...")
+            continue
 
         # Si fue una simulación, preguntar si desea ejecutar la migración real inmediatamente
         if dry_run:
@@ -138,14 +143,17 @@ def interactive_wizard():
             apply_real = input("\n👉 ¿Deseas aplicar la MIGRACIÓN REAL ahora con esta misma configuración? (s/n) [n]: ").strip().lower()
             if apply_real == "s":
                 print("\n🚀 Iniciando MIGRACIÓN REAL...")
-                organize_folder(
-                    target_dir=target_dir,
-                    dest_dir=dest_dir,
-                    dry_run=False,
-                    include_files=include_files,
-                    include_folders=include_folders
-                )
-                print("\n✨ ¡Migración real completada con éxito!")
+                try:
+                    organize_folder(
+                        target_dir=target_dir,
+                        dest_dir=dest_dir,
+                        dry_run=False,
+                        include_files=include_files,
+                        include_folders=include_folders
+                    )
+                    print("\n✨ ¡Migración real completada con éxito!")
+                except Exception as e:
+                    print(f"\n❌ [ERROR] Falló la migración real: {e}")
 
         # Preguntar si desea continuar o salir
         print("\n" + "=" * 60)

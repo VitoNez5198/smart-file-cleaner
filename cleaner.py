@@ -138,8 +138,20 @@ def organize_folder(
     print(f"\n{mode_label} Origen: {target_dir} ➔ Destino: {dest_dir}\n" + "-" * 60)
 
     moved_count = 0
+    skipped_count = 0
 
-    for item in target_dir.iterdir():
+    # Congelar la lista de elementos en memoria para evitar errores de iteración mientras se mueven
+    try:
+        items = list(target_dir.iterdir())
+    except Exception as e:
+        print(f"[ERROR] No se pudo leer el contenido de la carpeta: {e}")
+        return
+
+    for item in items:
+        # Verificar que el elemento siga existiendo (por si fue movido previa o externamente)
+        if not item.exists():
+            continue
+
         # Filtro de protección
         if is_protected_item(item, target_dir, dest_dir):
             continue
@@ -159,15 +171,19 @@ def organize_folder(
 
         if dry_run:
             print(f"[SIMULACIÓN] {item_type_label} {item.name} ➔ {category}/{dest_item_path.name}")
+            moved_count += 1
         else:
-            target_category_folder.mkdir(parents=True, exist_ok=True)
-            shutil.move(str(item), str(dest_item_path))
-            print(f"[MOVIDO] {item_type_label} {item.name} ➔ {category}/{dest_item_path.name}")
-
-        moved_count += 1
+            try:
+                target_category_folder.mkdir(parents=True, exist_ok=True)
+                shutil.move(str(item), str(dest_item_path))
+                print(f"[MOVIDO] {item_type_label} {item.name} ➔ {category}/{dest_item_path.name}")
+                moved_count += 1
+            except Exception as e:
+                skipped_count += 1
+                print(f"⚠️  [OMITIDO - EN USO O PERMISOS] {item_type_label} {item.name} ({e})")
 
     print("-" * 60)
-    print(f"Proceso finalizado. Total de elementos procesados: {moved_count}\n")
+    print(f"Proceso finalizado. Éxito: {moved_count} elementos | Omitidos/Errores: {skipped_count}\n")
 
 
 def export_scan_report(target_dir: Path, output_file: str = "scan_report.json"):
