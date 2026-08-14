@@ -1,0 +1,35 @@
+# Python cache & bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Entornos virtuales
+venv/
+.venv/
+env/
+ENV/
+
+# Archivos de configuración local y datos personales
+local_config.json
+user_config.py
+*.log
+logs/
+
+# Carpetas de prueba locales
+test_downloads/
+test_desktop/
+
+# IDEs y Editores de código
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Archivos del sistema operativo
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
