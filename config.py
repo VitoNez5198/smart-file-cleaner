@@ -22,19 +22,23 @@ EXTENSION_CATEGORIES = {
     "Logs_Temporales": [".log", ".tmp", ".bak"]
 }
 
-# 2. Reglas prioritarias por palabras clave en el nombre del archivo
+# 2. Reglas prioritarias por palabras clave (El orden de prioridad importa)
 KEYWORD_CATEGORIES = {
-    "AWS_Cloud_Credenciales": [
-        "labsuser", "accesskeys", "cloud", "amazon", "aws", "clave1"
+    # 1. Prioridad Máxima: Currículums y Postulaciones Laborales
+    "Postulaciones_CV": [
+        "cv", "curriculum", "resume", "carta de compromiso", "logros", "elevator pitch"
     ],
+    # 2. Material de Estudio Universidad AIEP
     "AIEP_Material_Estudio": [
         "aiep", "semana", "unidad", "tema", "pro303", "soo301", "actividad",
         "apunte", "clase", "taller", "orientados-a-objetos", "analisis-de-sistemas",
         "plantilla de entrega", "lab -", "demostración"
     ],
-    "Postulaciones_CV": [
-        "cv", "curriculum", "resume", "carta de compromiso", "logros", "elevator pitch"
+    # 3. Credenciales Cloud AWS
+    "AWS_Cloud_Credenciales": [
+        "labsuser", "accesskeys", "amazon", "aws", "clave1"
     ],
+    # 4. Capturas de Pantalla
     "Capturas_Pantalla": [
         "whatsapp", "captura", "pantalla", "screenshot"
     ]
