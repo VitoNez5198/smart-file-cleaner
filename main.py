@@ -124,6 +124,8 @@ def interactive_wizard():
         include_folders=include_folders
     )
 
+    input("\n✨ ¡Proceso completado! Presiona ENTER para salir...")
+
 
 def main():
     parser = argparse.ArgumentParser(

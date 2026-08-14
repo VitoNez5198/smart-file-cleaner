@@ -22,6 +22,7 @@ logs/
 build/
 dist/
 *.spec
+*.exe
 
 # Carpetas de prueba locales
 test_downloads/
