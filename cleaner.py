@@ -6,6 +6,19 @@ import shutil
 from pathlib import Path
 import config
 
+def get_category_by_keyword(file_path: Path) -> str | None:
+    """
+    Busca palabras clave en el nombre del archivo (sin extensión).
+    Si encuentra alguna coincidencia, retorna la categoría correspondiente.
+    """
+    stem_lower = file_path.stem.lower()
+    
+    for category, keywords in config.KEYWORD_CATEGORIES.items():
+        for keyword in keywords:
+            if keyword.lower() in stem_lower:
+                return category
+    return None
+
 def get_category_by_extension(file_path: Path) -> str:
     """
     Retorna la categoría correspondiente según la extensión del archivo.
@@ -15,6 +28,19 @@ def get_category_by_extension(file_path: Path) -> str:
         if ext in extensions:
             return category
     return config.DEFAULT_CATEGORY
+
+def determine_file_category(file_path: Path) -> str:
+    """
+    Determina la categoría final de un archivo priorizando palabras clave
+    sobre la extensión del archivo.
+    """
+    # 1. Intentar clasificar por palabras clave en el nombre
+    keyword_category = get_category_by_keyword(file_path)
+    if keyword_category:
+        return keyword_category
+
+    # 2. Si no hay coincidencia por palabra clave, clasificar por extensión
+    return get_category_by_extension(file_path)
 
 def get_unique_destination(dest_dir: Path, file_name: str) -> Path:
     """
@@ -37,7 +63,8 @@ def get_unique_destination(dest_dir: Path, file_name: str) -> Path:
 
 def organize_folder(target_dir: Path, dry_run: bool = True):
     """
-    Recorre la carpeta objetivo y organiza los archivos en subcarpetas según su extensión.
+    Recorre la carpeta objetivo y organiza los archivos en subcarpetas
+    priorizando palabras clave y luego extensiones.
     
     :param target_dir: Ruta de la carpeta a limpiar (pathlib.Path)
     :param dry_run: Si es True, solo muestra lo que haría sin mover archivos reales.
@@ -57,8 +84,8 @@ def organize_folder(target_dir: Path, dry_run: bool = True):
         if item.is_dir() or item.name.startswith("."):
             continue
         
-        # Determinar categoría por extensión
-        category = get_category_by_extension(item)
+        # Determinar categoría (Palabra Clave > Extensión > Otros)
+        category = determine_file_category(item)
         dest_folder = target_dir / category
         dest_file_path = get_unique_destination(dest_folder, item.name)
 
