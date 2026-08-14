@@ -42,89 +42,117 @@ def get_default_desktop() -> Path:
 
 def interactive_wizard():
     """
-    Asistente interactivo por consola paso a paso.
+    Asistente interactivo por consola paso a paso con bucle de menú principal.
     """
-    print("\n" + "=" * 60)
-    print("      🧹 SMART FILE CLEANER - ASISTENTE INTERACTIVO 🚀    ")
-    print("=" * 60)
+    while True:
+        print("\n" + "=" * 60)
+        print("      🧹 SMART FILE CLEANER - MENÚ PRINCIPAL 🚀    ")
+        print("=" * 60)
 
-    # PASO 1: Selección de Carpeta Origen
-    print("\n📌 PASO 1: ¿Qué carpeta deseas limpiar u organizar?")
-    print(f"  [1] 🖥️  Escritorio ({get_default_desktop()})")
-    print(f"  [2] 📥 Descargas ({get_default_downloads()})")
-    print("  [3] 📂 Pegar o escribir una ruta personalizada")
+        # PASO 1: Selección de Carpeta Origen
+        print("\n📌 PASO 1: ¿Qué carpeta deseas limpiar u organizar?")
+        print(f"  [1] 🖥️  Escritorio ({get_default_desktop()})")
+        print(f"  [2] 📥 Descargas ({get_default_downloads()})")
+        print("  [3] 📂 Pegar o escribir una ruta personalizada")
+        print("  [0] ❌ Salir del programa")
 
-    choice_origin = input("\n👉 Selecciona una opción (1-3) [Por defecto: 1]: ").strip()
-    
-    if choice_origin == "2":
-        target_dir = get_default_downloads()
-    elif choice_origin == "3":
-        custom_path = input("\n📋 Pega o escribe la ruta completa de la carpeta: ").strip().strip('"').strip("'")
-        target_dir = Path(custom_path)
-        if not target_dir.exists():
-            print(f"\n❌ [ERROR] La ruta especificada no existe: {target_dir}")
-            return
-    else:
-        target_dir = get_default_desktop()
+        choice_origin = input("\n👉 Selecciona una opción (0-3) [Por defecto: 1]: ").strip()
+        
+        if choice_origin == "0":
+            print("\n👋 ¡Gracias por usar Smart File Cleaner! Hasta pronto.\n")
+            break
 
-    # PASO 2: Selección de Destino
-    default_dest = get_default_downloads()
-    print(f"\n📌 PASO 2: ¿Dónde deseas guardar los archivos organizados?")
-    print(f"  [1] 🎯 Almacén Central en Descargas ({default_dest}) [Recomendado para Escritorio]")
-    print(f"  [2] 📂 Dentro de la misma carpeta origen ({target_dir})")
+        if choice_origin == "2":
+            target_dir = get_default_downloads()
+        elif choice_origin == "3":
+            custom_path = input("\n📋 Pega o escribe la ruta completa de la carpeta: ").strip().strip('"').strip("'")
+            target_dir = Path(custom_path)
+            if not target_dir.exists():
+                print(f"\n❌ [ERROR] La ruta especificada no existe: {target_dir}")
+                input("\nPresiona ENTER para volver al menú principal...")
+                continue
+        else:
+            target_dir = get_default_desktop()
 
-    choice_dest = input("\n👉 Selecciona el destino (1-2) [Por defecto: 1]: ").strip()
-    dest_dir = default_dest if choice_dest != "2" else target_dir
+        # PASO 2: Selección de Destino
+        default_dest = get_default_downloads()
+        print(f"\n📌 PASO 2: ¿Dónde deseas guardar los archivos organizados?")
+        print(f"  [1] 🎯 Almacén Central en Descargas ({default_dest}) [Recomendado para Escritorio]")
+        print(f"  [2] 📂 Dentro de la misma carpeta origen ({target_dir})")
 
-    # PASO 3: Selección del Tipo de Elementos
-    print("\n📌 PASO 3: ¿Qué tipo de elementos deseas mover?")
-    print("  [1] 📄 Solo archivos sueltos (PDFs, imágenes, instaladores, etc.)")
-    print("  [2] 📁 Solo carpetas (proyectos, laboratorios, subcarpetas)")
-    print("  [3] 📦 Archivos Y Carpetas (Limpieza completa)")
+        choice_dest = input("\n👉 Selecciona el destino (1-2) [Por defecto: 1]: ").strip()
+        dest_dir = default_dest if choice_dest != "2" else target_dir
 
-    choice_type = input("\n👉 Selecciona una opción (1-3) [Por defecto: 3]: ").strip()
-    
-    if choice_type == "1":
-        include_files, include_folders = True, False
-    elif choice_type == "2":
-        include_files, include_folders = False, True
-    else:
-        include_files, include_folders = True, True
+        # PASO 3: Selección del Tipo de Elementos
+        print("\n📌 PASO 3: ¿Qué tipo de elementos deseas mover?")
+        print("  [1] 📄 Solo archivos sueltos (PDFs, imágenes, instaladores, etc.)")
+        print("  [2] 📁 Solo carpetas (proyectos, laboratorios, subcarpetas)")
+        print("  [3] 📦 Archivos Y Carpetas (Limpieza completa)")
 
-    # PASO 4: Selección de Modo (Simulación vs Real)
-    print("\n📌 PASO 4: Modo de Operación")
-    print("  [1] 🧪 SIMULACIÓN (Recomendado: Previsualiza sin mover nada)")
-    print("  [2] 🚀 EJECUCIÓN REAL (Moverá físicamente los archivos y carpetas)")
+        choice_type = input("\n👉 Selecciona una opción (1-3) [Por defecto: 3]: ").strip()
+        
+        if choice_type == "1":
+            include_files, include_folders = True, False
+        elif choice_type == "2":
+            include_files, include_folders = False, True
+        else:
+            include_files, include_folders = True, True
 
-    choice_mode = input("\n👉 Selecciona el modo (1-2) [Por defecto: 1]: ").strip()
-    dry_run = False if choice_mode == "2" else True
+        # PASO 4: Selección de Modo (Simulación vs Real)
+        print("\n📌 PASO 4: Modo de Operación")
+        print("  [1] 🧪 SIMULACIÓN (Recomendado: Previsualiza sin mover nada)")
+        print("  [2] 🚀 EJECUCIÓN REAL (Moverá físicamente los archivos y carpetas)")
 
-    # Confirmación y Resumen
-    print("\n" + "-" * 60)
-    print("📋 RESUMEN DE LA OPERACIÓN:")
-    print(f"  • Carpeta Origen:   {target_dir}")
-    print(f"  • Carpeta Destino:  {dest_dir}")
-    print(f"  • Archivos:         {'Sí' if include_files else 'No'}")
-    print(f"  • Carpetas:         {'Sí' if include_folders else 'No'}")
-    print(f"  • Modo:             {'🧪 Simulación (Dry-Run)' if dry_run else '🚀 EJECUCIÓN REAL'}")
-    print("-" * 60)
+        choice_mode = input("\n👉 Selecciona el modo (1-2) [Por defecto: 1]: ").strip()
+        dry_run = False if choice_mode == "2" else True
 
-    if not dry_run:
-        confirm = input("\n⚠️  ¿Estás seguro de ejecutar los cambios reales? (s/n) [n]: ").strip().lower()
-        if confirm != "s":
-            print("\n❌ Operación cancelada por el usuario.")
-            return
+        # Confirmación y Resumen
+        print("\n" + "-" * 60)
+        print("📋 RESUMEN DE LA OPERACIÓN:")
+        print(f"  • Carpeta Origen:   {target_dir}")
+        print(f"  • Carpeta Destino:  {dest_dir}")
+        print(f"  • Archivos:         {'Sí' if include_files else 'No'}")
+        print(f"  • Carpetas:         {'Sí' if include_folders else 'No'}")
+        print(f"  • Modo Inicial:     {'🧪 Simulación (Dry-Run)' if dry_run else '🚀 EJECUCIÓN REAL'}")
+        print("-" * 60)
 
-    # Ejecutar la limpieza con las opciones seleccionadas
-    organize_folder(
-        target_dir=target_dir,
-        dest_dir=dest_dir,
-        dry_run=dry_run,
-        include_files=include_files,
-        include_folders=include_folders
-    )
+        if not dry_run:
+            confirm = input("\n⚠️  ¿Estás seguro de ejecutar los cambios reales? (s/n) [n]: ").strip().lower()
+            if confirm != "s":
+                print("\n❌ Operación cancelada por el usuario.")
+                input("\nPresiona ENTER para volver al menú principal...")
+                continue
 
-    input("\n✨ ¡Proceso completado! Presiona ENTER para salir...")
+        # Ejecutar la limpieza / simulación
+        organize_folder(
+            target_dir=target_dir,
+            dest_dir=dest_dir,
+            dry_run=dry_run,
+            include_files=include_files,
+            include_folders=include_folders
+        )
+
+        # Si fue una simulación, preguntar si desea ejecutar la migración real inmediatamente
+        if dry_run:
+            print("-" * 60)
+            apply_real = input("\n👉 ¿Deseas aplicar la MIGRACIÓN REAL ahora con esta misma configuración? (s/n) [n]: ").strip().lower()
+            if apply_real == "s":
+                print("\n🚀 Iniciando MIGRACIÓN REAL...")
+                organize_folder(
+                    target_dir=target_dir,
+                    dest_dir=dest_dir,
+                    dry_run=False,
+                    include_files=include_files,
+                    include_folders=include_folders
+                )
+                print("\n✨ ¡Migración real completada con éxito!")
+
+        # Preguntar si desea continuar o salir
+        print("\n" + "=" * 60)
+        again = input("👉 ¿Deseas realizar otra operación o volver al menú principal? (s/n) [s]: ").strip().lower()
+        if again == "n":
+            print("\n👋 ¡Gracias por usar Smart File Cleaner! Hasta pronto.\n")
+            break
 
 
 def main():
