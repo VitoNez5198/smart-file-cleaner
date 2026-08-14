@@ -5,7 +5,7 @@ main.py - Punto de entrada del script Smart File Cleaner.
 import argparse
 from pathlib import Path
 import config
-from cleaner import organize_folder
+from cleaner import organize_folder, export_scan_report
 
 def main():
     parser = argparse.ArgumentParser(description="Smart File Cleaner - Organizador automático de archivos")
@@ -19,6 +19,11 @@ def main():
         "--desktop",
         action="store_true",
         help="Organizar la carpeta Escritorio en lugar de Descargas"
+    )
+    parser.add_argument(
+        "--scan",
+        action="store_true",
+        help="Generar un reporte JSON detallado de inventario (scan_report.json) para análisis con IA"
     )
     parser.add_argument(
         "--real",
@@ -40,10 +45,16 @@ def main():
     else:
         target = config.TARGET_DIR
 
+    # Si se pide --scan, exportamos el informe para análisis
+    if args.scan:
+        export_scan_report(target_dir=target, output_file="scan_report.json")
+        return
+
     # Si NO se especifica --real, se mantiene dry_run = True por seguridad
     is_dry_run = not args.real
 
     organize_folder(target_dir=target, dry_run=is_dry_run)
+
 
 if __name__ == "__main__":
     main()

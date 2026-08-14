@@ -103,3 +103,65 @@ def organize_folder(target_dir: Path, dry_run: bool = True):
     print("-" * 50)
     print(f"Proceso finalizado. Total de archivos procesados: {moved_count}\n")
 
+
+def export_scan_report(target_dir: Path, output_file: str = "scan_report.json"):
+    """
+    Escanea la carpeta objetivo y genera un archivo de reporte JSON detallado con el inventario
+    de archivos, sus categorías asignadas, extensiones y sugerencias.
+    """
+    import json
+
+    if not target_dir.exists():
+        print(f"[ERROR] La carpeta objetivo no existe: {target_dir}")
+        return
+
+    print(f"\n[SCAN] Escaneando e inventariando carpeta: {target_dir}...")
+
+    files_info = []
+    category_summary = {}
+    unclassified_files = []
+
+    for item in target_dir.iterdir():
+        if item.is_dir() or item.name.startswith("."):
+            continue
+
+        category = determine_file_category(item)
+        ext = item.suffix.lower() if item.suffix else "sin_extension"
+
+        file_data = {
+            "name": item.name,
+            "category": category,
+            "extension": ext,
+            "size_kb": round(item.stat().st_size / 1024, 2)
+        }
+        files_info.append(file_data)
+
+        # Contador por categoría
+        category_summary[category] = category_summary.get(category, 0) + 1
+
+        if category == config.DEFAULT_CATEGORY:
+            unclassified_files.append(item.name)
+
+    report = {
+        "target_directory": str(target_dir),
+        "total_files": len(files_info),
+        "category_summary": category_summary,
+        "unclassified_count": len(unclassified_files),
+        "unclassified_files": unclassified_files,
+        "files": files_info
+    }
+
+    output_path = Path(output_file)
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(report, f, ensure_ascii=False, indent=2)
+
+    print(f"[EXITO] Reporte de escaneo guardado en: {output_path.resolve()}")
+    print("-" * 50)
+    print(f"Total de archivos escaneados: {len(files_info)}")
+    print("Resumen por categorías propuestas:")
+    for cat, count in category_summary.items():
+        print(f"  - {cat}: {count} archivos")
+    print(f"Archivos sin clasificar ('Otros'): {len(unclassified_files)}")
+    print("-" * 50)
+
+

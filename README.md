@@ -1,16 +1,17 @@
 # Smart File Cleaner 🧹✨
 
-Un script automatizado en Python para organizar y limpiar tus carpetas de **Descargas** y **Escritorio** de forma inteligente, clasificando los archivos por palabras clave y extensiones.
+Un script automatizado en Python para organizar y limpiar tus carpetas de **Descargas** y **Escritorio** de forma inteligente, clasificando los archivos por palabras clave, contenido e inventario analítico.
 
 ---
 
 ## 🌟 Características Principales
 
-- **🎯 Filtrado Inteligente por Palabras Clave**: Detecta patrones en el nombre del archivo (ejemplo: `cv`, `aiep`, `contrato`) y los agrupa en carpetas prioritarias antes de evaluar la extensión.
-- **📂 Organización por Extensiones**: Clasifica los archivos restantes en categorías estándar (Documentos, Imágenes, Instaladores, Código, Audio, Video, etc.).
+- **📊 Análisis e Inventario IA (`--scan`)**: Genera un archivo de reporte JSON (`scan_report.json`) con el inventario completo de tus archivos para analizar patrones y proponer categorías a medida.
+- **🎯 Filtrado Inteligente por Palabras Clave**: Detecta patrones en el nombre del archivo (ej: `AIEP`, `labsuser`, `cv`, `contrato`, `captura`) y los agrupa en carpetas específicas prioritarias.
+- **📂 Organización por Extensiones y Formatos Modernos**: Clasifica archivos en categorías especializadas (Documentos, Imágenes HEIC/AVIF, Notebooks Jupyter `.ipynb`, Credenciales AWS `.pem`/`.ppk`, Libros `.epub`, etc.).
 - **🛡️ Modo Simulación Seguro (Dry-Run por defecto)**: Permite previsualizar los cambios en la consola sin modificar ni mover ningún archivo real.
-- **🔁 Manejo Automático de Duplicados**: Si ya existe un archivo con el mismo nombre en la carpeta de destino, le asigna un sufijo numérico (`archivo (1).pdf`) para evitar sobreescrituras accidentales.
-- **🚀 Cero Dependencias Externas**: Desarrollado 100% con la librería estándar de Python (`pathlib`, `shutil`, `argparse`).
+- **🔁 Manejo Automático de Duplicados**: Si ya existe un archivo con el mismo nombre en la carpeta de destino, le asigna un sufijo numérico (`archivo (1).pdf`) evitando sobreescrituras.
+- **🚀 Cero Dependencias Externas**: Desarrollado 100% con la librería estándar de Python (`pathlib`, `shutil`, `argparse`, `json`).
 
 ---
 
@@ -20,81 +21,64 @@ Un script automatizado en Python para organizar y limpiar tus carpetas de **Desc
 smart-file-cleaner/
 ├── .gitignore          # Filtro de archivos para evitar subir entornos o datos personales
 ├── config.py           # Configuración de carpetas, extensiones y palabras clave
-├── cleaner.py          # Lógica principal de filtrado y movimiento de archivos
-├── main.py             # Interfaz de línea de comandos (CLI) y ejecutable
+├── cleaner.py          # Lógica principal de filtrado, escaneo y movimiento
+├── main.py             # Interfaz de línea de comandos (CLI)
 └── README.md           # Documentación profesional del proyecto
 ```
 
 ---
 
-## 💻 Requisitos
-
-- **Python 3.8+** (No requiere instalar paquetes adicionales vía `pip`).
-
----
-
 ## 🚀 Guía de Uso
 
-### 1. Previsualizar cambios (Modo Simulación - Recomendado)
-Por defecto, el script se ejecuta en **Modo Simulación** para que revises la vista previa sin mover nada:
+### 1. Escanear e Inventariar la Carpeta (`--scan`)
+Genera un reporte JSON con la distribución propuesta de categorías sin mover nada:
 
 ```bash
-python main.py
+python main.py --scan --folder "D:\Descargas"
 ```
 
-### 2. Ejecutar movimiento real de archivos
-Para aplicar la organización real en tu carpeta de Descargas, añade la bandera `--real`:
+### 2. Previsualizar cambios (Modo Simulación)
+Revisa la simulación en la consola para confirmar qué se movería y dónde:
 
 ```bash
-python main.py --real
+python main.py --folder "D:\Descargas"
 ```
 
-### 3. Organizar el Escritorio en lugar de Descargas
-Puedes indicar que aplique la limpieza sobre tu Escritorio usando `--desktop`:
+### 3. Ejecutar movimiento real de archivos
+Aplica la organización física de archivos agregando `--real`:
 
+```bash
+python main.py --folder "D:\Descargas" --real
+```
+
+### 4. Organizar el Escritorio
 ```bash
 # Simular en el Escritorio
 python main.py --desktop
 
-# Mover realmente los archivos del Escritorio
+# Organizar realmente el Escritorio
 python main.py --desktop --real
-```
-
-### 4. Organizar cualquier carpeta personalizada
-```bash
-python main.py --folder "C:\Ruta\A\Tu\Carpeta" --real
 ```
 
 ---
 
-## ⚙️ Personalización (`config.py`)
+## ⚙️ Categorías Configuradas (`config.py`)
 
-Puedes adaptar las categorías a tus necesidades editando `config.py`:
-
-- **Añadir nuevas Palabras Clave**:
-  ```python
-  KEYWORD_CATEGORIES = {
-      "Postulaciones_CV": ["cv", "curriculum", "resume"],
-      "AIEP": ["aiep", "tarea", "evaluacion", "clase"],
-      "Contratos_Legales": ["contrato", "acuerdo", "firma", "finiquito"],
-      "Proyectos_Web": ["portfolio", "wireframe", "diseño"]
-  }
-  ```
-
-- **Añadir nuevas Extensiones**:
-  ```python
-  EXTENSION_CATEGORIES = {
-      "Documentos": [".pdf", ".docx", ".xlsx", ".epub"],
-      "Diseño": [".psd", ".ai", ".fig"]
-  }
-  ```
+- **`AIEP_Material_Estudio`**: Guías, evaluaciones, unidades, semestres, tareas (`soo301`, `pro303`, etc.).
+- **`AWS_Cloud_Credenciales`**: Claves `.pem`, `.ppk`, accesos de laboratorio de nube (`labsuser`, `accesskeys`).
+- **`Postulaciones_CV`**: Currículums, cartas de presentación y logros.
+- **`Codigo_Notebooks`**: Scripts `.py`, Notebooks `.ipynb`, schemas `.sql`, `.json`, etc.
+- **`Capturas_Pantalla`**: Screenshots de WhatsApp y capturas de pantalla.
+- **`Libros_Ebooks`**: Archivos `.epub`, `.mobi`, `.azw3`.
+- **`Imagenes`**: Archivos de imagen estándar y modernos (`.jpg`, `.png`, `.heic`, `.avif`).
+- **`Documentos`**, **`Video`**, **`Audio`**, **`Instaladores_Software`**, **`Archivos_Comprimidos`**, etc.
 
 ---
 
 ## 🔒 Privacidad y Seguridad
 
-- **100% Local**: No requiere conexión a internet ni envía datos a servidores externos.
-- **Filtros .gitignore**: Diseñado desde el primer paso para proteger archivos locales, registros e información privada.
+- **100% Local**: Funciona totalmente sin internet y sin enviar archivos a servidores externos.
+- **Protección Git**: El reporte `scan_report.json` e información sensible se encuentran en [.gitignore](file:///d:/Escritorio/smart_file_cleaner/smart-file-cleaner/.gitignore).
 
 ---
 

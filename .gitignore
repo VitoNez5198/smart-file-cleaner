@@ -14,6 +14,7 @@ ENV/
 # Archivos de configuración local y datos personales
 local_config.json
 user_config.py
+scan_report.json
 *.log
 logs/
 

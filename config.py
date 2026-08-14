@@ -1,32 +1,44 @@
 """
-config.py - Configuración inicial para Smart File Cleaner.
-Define la estructura de carpetas, extensiones soportadas y reglas por palabras clave.
+config.py - Configuración personalizada para Smart File Cleaner.
+Basada en el análisis del inventario real de 652 archivos del usuario.
 """
 
 from pathlib import Path
 
-# Carpeta objetivo por defecto (por ejemplo: Descargas o Escritorio)
-# Se puede cambiar según la carpeta que desees organizar.
+# Carpeta objetivo por defecto
 TARGET_DIR = Path.home() / "Downloads"
 
-# Mapeo de categorías por extensión de archivo
+# 1. Categorías por extensión de archivo
 EXTENSION_CATEGORIES = {
-    "Documentos": [".pdf", ".docx", ".doc", ".txt", ".xlsx", ".pptx", ".odt"],
-    "Imagenes": [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".bmp"],
-    "Archivos": [".zip", ".rar", ".7z", ".tar", ".gz"],
-    "Audio": [".mp3", ".wav", ".flac", ".aac"],
-    "Video": [".mp4", ".mkv", ".avi", ".mov"],
-    "Instaladores": [".exe", ".msi", ".dmg"],
-    "Codigo": [".py", ".js", ".html", ".css", ".json", ".sql"]
+    "Documentos": [".pdf", ".docx", ".doc", ".txt", ".xlsx", ".xls", ".pptx", ".odt", ".csv", ".rtf", ".md"],
+    "Imagenes": [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".bmp", ".heic", ".heif", ".ico", ".avif"],
+    "Libros_Ebooks": [".epub", ".mobi", ".azw3", ".fb2"],
+    "Archivos_Comprimidos": [".zip", ".rar", ".7z", ".tar", ".gz", ".iso"],
+    "Audio": [".mp3", ".wav", ".flac", ".aac", ".ogg", ".m4a"],
+    "Video": [".mp4", ".mkv", ".avi", ".mov", ".webm"],
+    "Instaladores_Software": [".exe", ".msi", ".dmg", ".pkg", ".deb", ".vsix", ".msix"],
+    "Codigo_Notebooks": [".py", ".ipynb", ".js", ".html", ".css", ".json", ".sql", ".sh", ".ps1", ".cpp", ".java", ".mdj"],
+    "Credenciales_Cloud": [".pem", ".ppk", ".key"],
+    "Logs_Temporales": [".log", ".tmp", ".bak"]
 }
 
-# Mapeo de reglas avanzadas por palabras clave en el nombre del archivo
-# (Se utilizará en el Paso 3)
+# 2. Reglas prioritarias por palabras clave en el nombre del archivo
 KEYWORD_CATEGORIES = {
-    "Postulaciones_CV": ["cv", "curriculum", "resume"],
-    "AIEP": ["aiep", "tarea", "evaluacion", "clase"],
-    "Contratos_Legales": ["contrato", "acuerdo", "firma", "finiquito"]
+    "AWS_Cloud_Credenciales": [
+        "labsuser", "accesskeys", "cloud", "amazon", "aws", "clave1"
+    ],
+    "AIEP_Material_Estudio": [
+        "aiep", "semana", "unidad", "tema", "pro303", "soo301", "actividad",
+        "apunte", "clase", "taller", "orientados-a-objetos", "analisis-de-sistemas",
+        "plantilla de entrega", "lab -", "demostración"
+    ],
+    "Postulaciones_CV": [
+        "cv", "curriculum", "resume", "carta de compromiso", "logros", "elevator pitch"
+    ],
+    "Capturas_Pantalla": [
+        "whatsapp", "captura", "pantalla", "screenshot"
+    ]
 }
 
-# Carpeta para archivos que no coincidan con ninguna categoría
+# Carpeta por defecto
 DEFAULT_CATEGORY = "Otros"
