@@ -258,12 +258,21 @@ def deep_organize_folder(target_dir: Path, dry_run: bool = True):
     cleanup_empty_folders(target_dir, dry_run=dry_run)
 
 
+def remove_readonly(func, path, exc_info):
+    """Manejador de permisos en Windows para eliminar carpetas con atributo de solo lectura o en uso previo."""
+    import stat, os
+    try:
+        os.chmod(path, stat.S_IWRITE)
+        func(path)
+    except Exception:
+        pass
+
 def cleanup_empty_folders(target_dir: Path, dry_run: bool = True):
     """
     Elimina carpetas temporales o secundarias que hayan quedado 100% vacías.
     Conserva intactas las carpetas de categorías principales.
     """
-    main_categories = set(config.EXTENSION_CATEGORIES.keys()).union(config.KEYWORD_CATEGORIES.keys())
+    main_categories = set(config.EXTENSION_CATEGORIES.keys()).union(config.get_all_keyword_categories().keys())
     main_categories.add(config.DEFAULT_CATEGORY)
     main_categories.add(getattr(config, "DEFAULT_FOLDER_CATEGORY", "Proyectos_Y_Carpetas"))
 
@@ -279,11 +288,11 @@ def cleanup_empty_folders(target_dir: Path, dry_run: bool = True):
                 if dry_run:
                     print(f"[SIMULACIÓN] 🗑️  Carpeta vacía detectada: {folder.name} (se eliminaría)")
                 else:
-                    folder.rmdir()
+                    shutil.rmtree(str(folder), onerror=remove_readonly)
                     print(f"[ELIMINADA CARPETA VACÍA] 🗑️  {folder.name}")
                 removed_dirs += 1
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"⚠️  [OMITIDO CARPETA VACÍA] {folder.name}: {e}")
 
 
 def export_scan_report(target_dir: Path, output_file: str = "scan_report.json"):
